@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from 'react-hot-toast'
 import { signInWithCustomToken } from 'firebase/auth'
 import { auth } from '../config/firebase'
+import { twoFactorApi } from '../services/api'
 
 export default function LinkedInCallback() {
     const [searchParams] = useSearchParams()
@@ -12,7 +13,6 @@ export default function LinkedInCallback() {
     useEffect(() => {
         const handleCallback = async () => {
             const token = searchParams.get('token')
-            const isNew = searchParams.get('isNew') === 'true'
             const error = searchParams.get('error')
 
             if (error) {
@@ -22,13 +22,12 @@ export default function LinkedInCallback() {
                     linkedin_token_failed: 'Could not connect to LinkedIn. Please try again.',
                     linkedin_profile_failed: 'Could not fetch your LinkedIn profile. Please try again.',
                 };
-
                 toast.error(messages[error] || 'LinkedIn sign-in failed.')
                 navigate('/login')
                 return
             }
 
-            if(!token) {
+            if (!token) {
                 toast.error('Something went wrong. Please try again.')
                 navigate('/login')
                 return
@@ -37,6 +36,20 @@ export default function LinkedInCallback() {
             try {
                 setStatus('Completing sign-in...')
                 await signInWithCustomToken(auth, token)
+
+                try {
+                    const tfaStatus = await twoFactorApi.getStatus()
+                    if (tfaStatus && tfaStatus.enabled) {
+                        setStatus('Two-factor authentication required...')
+                        toast.success('Two-factor authentication required')
+                        navigate('/login?step=totp')
+                        return
+                    }
+                } catch {
+                    // 2FA check failed — proceed normally
+                }
+
+                toast.success('Signed in successfully!')
                 navigate('/dashboard')
             } catch (err) {
                 console.error('Custom token sign-in failed:', err);
