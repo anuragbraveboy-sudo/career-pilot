@@ -46,8 +46,11 @@ export default function LinkedInCallback() {
                         return
                     }
                 } catch {
-                    // 2FA check failed — proceed normally
-                }
+  // 2FA check failed — sign out for security
+  await auth.signOut()
+  toast.error('Authentication failed. Please try again.')
+  navigate('/login')
+}
 
                 toast.success('Signed in successfully!')
                 navigate('/dashboard')
