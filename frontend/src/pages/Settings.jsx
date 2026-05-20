@@ -41,10 +41,12 @@ export default function Settings() {
     }
   }
 
-  const Toggle = ({ value, onChange }) => (
+  const Toggle = ({ value, onChange, label }) => (
     <button
+      type="button"
       role="switch"
       aria-checked={value}
+      aria-label={label}
       onClick={() => onChange(!value)}
       className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${
         value ? 'bg-primary' : 'bg-muted'
@@ -86,6 +88,7 @@ export default function Settings() {
               <Toggle
                 value={preferences.jobAlerts}
                 onChange={(val) => setPreferences({ ...preferences, jobAlerts: val })}
+                label="Toggle Job Alerts"
               />
             </div>
 
@@ -100,6 +103,7 @@ export default function Settings() {
               <Toggle
                 value={preferences.directMessages}
                 onChange={(val) => setPreferences({ ...preferences, directMessages: val })}
+                label="Toggle Direct Messages"
               />
             </div>
 
@@ -114,6 +118,7 @@ export default function Settings() {
               <Toggle
                 value={preferences.proposalUpdates}
                 onChange={(val) => setPreferences({ ...preferences, proposalUpdates: val })}
+                label="Toggle Proposal Updates"
               />
             </div>
 
