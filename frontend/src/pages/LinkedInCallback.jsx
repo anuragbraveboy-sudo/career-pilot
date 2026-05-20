@@ -50,6 +50,7 @@ export default function LinkedInCallback() {
   await auth.signOut()
   toast.error('Authentication failed. Please try again.')
   navigate('/login')
+  return
 }
 
                 toast.success('Signed in successfully!')
