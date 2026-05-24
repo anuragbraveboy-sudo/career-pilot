@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
-import { resumeApi } from '../services/api'
+import { resumeApi, enhanceApi } from '../services/api'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import CustomSection, { sectionsToMarkdown } from '../components/CustomSection'
@@ -17,36 +17,7 @@ export default function ResumeView() {
   const [loading, setLoading] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [activeTab, setActiveTab] = useState('enhanced') // 'original' or 'enhanced'
-  const [scoreData, setScoreData] = useState({
-  overallScore: 82,
-  sections: {
-    summary: {
-      score: 80,
-      feedback: "Strong professional summary"
-    },
-    skills: {
-      score: 88,
-      feedback: "Relevant technical skills"
-    },
-    experience: {
-      score: 75,
-      feedback: "Add more measurable achievements"
-    },
-    education: {
-      score: 90,
-      feedback: "Education section is well structured"
-    },
-    projects: {
-      score: 78,
-      feedback: "Projects could include impact metrics"
-    }
-  },
-  topSuggestions: [
-    "Add quantified achievements",
-    "Improve project descriptions",
-    "Use stronger action verbs"
-  ]
-})
+  const [scoreData, setScoreData] = useState(null)
   const [scoring, setScoring] = useState(false)
   const [scoringStep, setScoringStep] = useState(0)
 
@@ -138,40 +109,50 @@ export default function ResumeView() {
   }
 
   const handleAnalyzeResume = async () => {
-  try {
-    setScoring(true)
+    try {
+      setScoring(true)
 
-    const resumeText =
-      activeTab === 'enhanced'
-        ? resume?.enhancedText
-        : resume?.originalText
+      const resumeText =
+        activeTab === 'enhanced'
+          ? resume?.enhancedText
+          : resume?.originalText
 
-    const response = await fetch(
-      'http://localhost:5000/api/resumes/score',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ resumeText }),
+      if (!resumeText || !resumeText.trim()) {
+        toast.error('No resume text available to analyze.')
+        return
       }
-    )
 
-    const data = await response.json()
+      const result = await enhanceApi.scoreResume(resumeText)
 
-    if (!data.success) {
-      throw new Error(data.message || 'Failed to analyze resume')
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to analyze resume')
+      }
+
+      setScoreData(result.data)
+      toast.success('Resume analyzed successfully!')
+    } catch (error) {
+      console.error('Resume analysis error:', error)
+
+      if (error.message === 'Not authenticated') {
+        toast.error('Session expired. Please log in again.')
+      } else if (error.status === 429) {
+        const retryMsg = error.retryAfter
+          ? ` Try again in ${Math.ceil(error.retryAfter / 60)} minutes.`
+          : ' Try again tomorrow.'
+        toast.error(`Daily AI limit reached.${retryMsg}`)
+      } else if (error.status === 401 || error.status === 403) {
+        toast.error('Authentication error. Please log in again.')
+      } else if (error.status >= 500) {
+        toast.error('Analysis service temporarily unavailable. Please try again.')
+      } else if (!navigator.onLine || error.message?.includes('Failed to fetch')) {
+        toast.error('Network error. Check your connection and try again.')
+      } else {
+        toast.error(error.message || 'Failed to analyze resume. Please try again.')
+      }
+    } finally {
+      setScoring(false)
     }
-
-    setScoreData(data.data)
-    toast.success('Resume analyzed successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error('Failed to analyze resume')
-  } finally {
-    setScoring(false)
   }
-}
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
