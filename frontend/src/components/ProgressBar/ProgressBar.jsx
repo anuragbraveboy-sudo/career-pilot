@@ -33,7 +33,7 @@ const ProgressBar = ({
 
   useEffect(() => {
     if (!isIndeterminate) {
-     const clamped = Math.min(100, Math.max(0, isNaN(value) ? 0 : value));
+      const clamped = Math.min(100, Math.max(0, isNaN(value) ? 0 : value));
       const timer = setTimeout(() => setWidth(clamped), 50);
       return () => clearTimeout(timer);
     }
@@ -65,12 +65,7 @@ const ProgressBar = ({
               className={`${barHeight} ${barColor} rounded-full w-1/3`}
               style={{ animation: "indeterminate 1.5s infinite ease-in-out" }}
             />
-            <style>{`
-              @keyframes indeterminate {
-                0% { transform: translateX(-100%); }
-                100% { transform: translateX(400%); }
-              }
-            `}</style>
+            <style>{`\n              @keyframes indeterminate {\n                0% { transform: translateX(-100%); }\n                100% { transform: translateX(400%); }\n              }\n            `}</style>
           </>
         ) : (
           <div
@@ -85,22 +80,7 @@ const ProgressBar = ({
       </div>
 
       {animated && (
-        <style>{`
-          .progress-stripes {
-            background-image: repeating-linear-gradient(
-              45deg,
-              rgba(255,255,255,0.15) 0px,
-              rgba(255,255,255,0.15) 10px,
-              transparent 10px,
-              transparent 20px
-            );
-            animation: stripes 1s linear infinite;
-          }
-          @keyframes stripes {
-            from { background-position: 0 0; }
-            to { background-position: 40px 0; }
-          }
-        `}</style>
+        <style>{`\n          .progress-stripes {\n            background-image: repeating-linear-gradient(\n              45deg,\n              rgba(255,255,255,0.15) 0px,\n              rgba(255,255,255,0.15) 10px,\n              transparent 10px,\n              transparent 20px\n            );\n            animation: stripes 1s linear infinite;\n          }\n          @keyframes stripes {\n            from { background-position: 0 0; }\n            to { background-position: 40px 0; }\n          }\n        `}</style>
       )}
     </div>
   );
