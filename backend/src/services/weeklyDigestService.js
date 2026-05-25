@@ -391,13 +391,13 @@ export const sendWeeklyDigests = async () => {
       // week don't create duplicate digest sends.
       const weekKey = `${new Date().getUTCFullYear()}-W${getISOWeek(new Date())}`;
 
-      const jobs = users.map((user) => ({
+      const jobs = users.map((user, index) => ({
         name: 'send-digest',
         data: { userId: user._id.toString() },
         opts: {
           jobId: `digest-${user._id.toString()}-${weekKey}`,
-          // Stagger jobs slightly to spread Gemini API load
-          delay: 0
+          // Stagger jobs by 500 ms each to spread Gemini API pressure
+          delay: index * 500
         }
       }));
 
