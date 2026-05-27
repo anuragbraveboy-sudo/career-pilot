@@ -1,3 +1,10 @@
+# [1.40.0](https://github.com/anurag3407/career-pilot/compare/v1.39.0...v1.40.0) (2026-05-27)
+
+
+### Features
+
+* implement Nature Forest theme About section ([1993b3f](https://github.com/anurag3407/career-pilot/commit/1993b3fd053671ff807776fc8101cc598b44da49))
+
 # [1.39.0](https://github.com/anurag3407/career-pilot/compare/v1.38.1...v1.39.0) (2026-05-27)
 
 
